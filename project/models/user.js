@@ -10,16 +10,9 @@ module.exports = function(app) {
       unique: true,
       required: true
     },
-    username: {
-      type: String,
-      unique: true,
-      required: true
-    },
     hashedPassword: String,
     salt: String,
     name: String,
-    admin: Boolean,
-    guest: Boolean,
     provider: String
   });
 
@@ -38,7 +31,7 @@ module.exports = function(app) {
 
   User.virtual('user_info')
     .get(function () {
-      return { '_id': this._id, 'username': this.username, 'email': this.email };
+      return { '_id': this._id, 'name': this.name, 'email': this.email };
     });
 
   /**
@@ -61,14 +54,6 @@ module.exports = function(app) {
     });
   }, 'The specified email address is already in use.');
 
-  User.path('username').validate(function(value, respond) {
-    db.models["user"].findOne({username: value}, function(err, user) {
-      if(err) throw err;
-      if(user) return respond(false);
-      respond(true);
-    });
-  }, 'The specified username is already in use.');
-
   /**
    * Pre-save hook
    */
@@ -80,6 +65,11 @@ module.exports = function(app) {
     if (!validatePresenceOf(this.password)) {
       next(new Error('Invalid password'));
     }
+
+    if (!validatePresenceOf(this.name)) {
+      next(new Error('Invalid name'));
+    }
+
     else {
       next();
     }

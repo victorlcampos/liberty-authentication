@@ -13,12 +13,9 @@ module.exports = function (app) {
       }
     },
     logout: function(req, res) {
-      if(req.user) {
-        req.logout();
-        res.send(200);
-      } else {
-        res.send(400, "Not logged in");
-      }
+      req.logout();
+      res.clearCookie("user");
+      res.send(200);
     },
     login: function(req, res, next) {
       passport.authenticate('local', function(err, user, info) {

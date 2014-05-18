@@ -1,5 +1,4 @@
 module.exports = function (app) {
-
   var User     = app.models.user    ;
   var passport = require('passport');
 
@@ -7,14 +6,18 @@ module.exports = function (app) {
     current_user: function(req, res) {
       var user = req.user;
       if (user) {
-        res.json(req.user.user_info);
+        var user_info   = req.user.user_info;
+        user_info.token = app.tokenize(user_info._id);
+
+        console.log(user_info.token);
+
+        res.json(user_info);
       } else {
-        res.send(400, "Not logged in");
+        res.send(403, "Not logged in");
       }
     },
     logout: function(req, res) {
       req.logout();
-      res.clearCookie("user");
       res.send(200);
     },
     login: function(req, res, next) {
@@ -30,7 +33,9 @@ module.exports = function (app) {
             console.log(error);
             return res.send(err);
           }
-          res.json(req.user.user_info);
+          var user_info   = req.user.user_info;
+          user_info.token = app.tokenize(user_info._id);
+          res.json(user_info);
         });
 
       })(req, res, next);
